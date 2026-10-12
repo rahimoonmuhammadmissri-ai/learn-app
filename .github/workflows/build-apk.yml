@@ -35,4 +35,5 @@ jobs:
       - name: Publish APK
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "build-${{ github.run_number }}" build/app/outputs/flutter-apk/app-release.apk --title "Learn build ${{ github.run_number }}" --notes "Phase 3A: STBB Math III test"
+        run: |
+          gh release create "build-${{ github.run_number }}" build/app/outputs/flutter-apk/app-release.apk --title "Learn build ${{ github.run_number }}" --notes "Phase 3A STBB Math III test"
