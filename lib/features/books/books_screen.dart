@@ -50,7 +50,7 @@ class _BooksScreenState extends State<BooksScreen> {
   Widget _header(BuildContext context, int count) {
     final cs = Theme.of(context).colorScheme;
     final lib = _tab == 0;
-    final subs = _store.classNo == null ? allSubjects : subjectsForClass(_store.classNo!);
+    final subs = _store.subjects();
     final active = _q.text.isNotEmpty || (lib && _store.hasFilters);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       SegmentedButton<int>(
@@ -82,12 +82,15 @@ class _BooksScreenState extends State<BooksScreen> {
       if (lib) ...[
         _chips('Board', ['All', for (final b in boards) b.short], _store.board == null ? 0 : 1 + boards.indexWhere((b) => b.id == _store.board),
             (i) => _store.setBoard(i == 0 ? null : boards[i - 1].id)),
-        _chips('Class', ['All', for (var c = 1; c <= 12; c++) 'Class $c'], _store.classNo ?? 0, (i) => _store.setClass(i == 0 ? null : i)),
+        _chips('Class', ['All', 'ECCE', for (var c = 1; c <= 12; c++) 'Class $c'], _store.classNo == null ? 0 : _store.classNo! + 1,
+            (i) => _store.setClass(i == 0 ? null : i - 1)),
+        _chips('Medium', ['All', ...mediums], _store.medium == null ? 0 : 1 + mediums.indexOf(_store.medium!),
+            (i) => _store.setMedium(i == 0 ? null : mediums[i - 1])),
         _chips('Subject', ['All', ...subs], _store.subject == null ? 0 : 1 + subs.indexOf(_store.subject!),
             (i) => _store.setSubject(i == 0 ? null : subs[i - 1])),
         const SizedBox(height: 12),
         Text(
-          'Books can be downloaded only when a verified official PDF source has been added.',
+          'Books come from the official STBB eBooks portal. Other boards will be added later.',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
         ),
       ],
@@ -122,11 +125,13 @@ class _BooksScreenState extends State<BooksScreen> {
               if (i == 0) return _header(context, items.length);
               if (items.isEmpty) {
                 return lib
-                    ? const EmptyState(icon: Icons.search_off_rounded, title: 'No books found', message: 'Try a different search or clear the filters.')
+                    ? (_store.board != null && _store.board != 'stbb'
+                        ? const EmptyState(icon: Icons.hourglass_empty_rounded, title: 'Not added yet', message: 'Books for this board have not been added yet.')
+                        : const EmptyState(icon: Icons.search_off_rounded, title: 'No books found', message: 'Try a different search or clear the filters.'))
                     : const EmptyState(
                         icon: Icons.cloud_download_outlined,
                         title: 'Nothing downloaded yet',
-                        message: 'Books with a verified source can be downloaded from their details page.');
+                        message: 'Download a book from its details page and it will appear here.');
               }
               final b = items[i - 1];
               return Padding(

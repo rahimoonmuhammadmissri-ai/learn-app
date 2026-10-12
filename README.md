@@ -5,14 +5,17 @@ Built from a phone: edit on GitHub, GitHub Actions builds the APK.
 
 ## Build
 Push to `main` (or Actions > Build APK > Run workflow). The APK appears under Releases.
-The `android/` folder is generated in CI, so it is not stored in the repo.
+The `android/` folder is generated in CI. The workflow adds the INTERNET permission to the generated manifest.
 
 ## Structure
 - `lib/core/` theme (colors, light/dark) and reusable widgets
 - `lib/features/<name>/` one folder per feature
-- `lib/features/books/` books_data (boards, catalog, verified sources), books_store (saved filters, downloads), screens
-- `PROJECT_STATE.md` current progress; paste it into a new chat to continue
+- `lib/features/books/`: books_data (verified catalog), books_store (filters, downloads), screens, pdf_reader_screen
 
-## Adding a book source
-Only add links to official or properly licensed PDFs. Add the book id to `verifiedSources`
-in `lib/features/books/books_data.dart` (see the example comment there).
+## Books
+Books come from the official STBB eBooks portal (https://portal.stbb.edu.pk/ebooks/). PDFs are NOT stored in this
+repo or on any server of ours; the app downloads them from STBB to the user's phone.
+A book is added to `catalog` only after its official detail page was opened and the "Download PDF" link copied from it.
+
+## Packages
+shared_preferences, path_provider, pdfrx (MIT, PDF reader). All free.

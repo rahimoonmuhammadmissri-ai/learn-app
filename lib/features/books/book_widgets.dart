@@ -20,7 +20,7 @@ IconData subjectIcon(String s) => switch (s) {
       _ => Icons.auto_stories_rounded,
     };
 
-/// Generated cover (no real cover images yet).
+/// Generated cover (no real cover images).
 class BookCover extends StatelessWidget {
   const BookCover(this.book, {super.key, this.size = 56});
   final Book book;
@@ -40,9 +40,7 @@ class BookCover extends StatelessWidget {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(subjectIcon(book.subject), color: Colors.white, size: size * .4),
         const SizedBox(height: 4),
-        FittedBox(
-          child: Text('Class ${book.classNo}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-        ),
+        FittedBox(child: Text(book.classLabel, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700))),
       ]),
     );
   }
@@ -56,22 +54,20 @@ class StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = BooksStore.instance;
     final p = s.progress[book.id];
-    final (String, Color, IconData) v = s.downloaded.contains(book.id)
-        ? ('Downloaded', AppColors.teal, Icons.download_done_rounded)
-        : p != null
-            ? (p < 0 ? 'Downloading' : 'Downloading ${(p * 100).round()}%', AppColors.violet, Icons.downloading_rounded)
-            : book.hasSource
-                ? ('Download available', AppColors.violet, Icons.cloud_download_outlined)
-                : ('Source not added yet', AppColors.amber, Icons.info_outline_rounded);
+    final (String, Color, IconData) v = switch (s.statusOf(book)) {
+      BookStatus.downloaded => ('Downloaded', AppColors.teal, Icons.download_done_rounded),
+      BookStatus.downloading => (p == null || p < 0 ? 'Downloading' : 'Downloading ${(p * 100).round()}%', AppColors.violet, Icons.downloading_rounded),
+      BookStatus.failed => ('Download failed', const Color(0xFFE5484D), Icons.error_outline_rounded),
+      BookStatus.unavailable => ('Unavailable', Colors.grey, Icons.block_rounded),
+      BookStatus.download => ('Download', AppColors.violet, Icons.cloud_download_outlined),
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: v.$2.withValues(alpha: .16), borderRadius: BorderRadius.circular(20)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(v.$3, size: 14, color: v.$2),
         const SizedBox(width: 4),
-        Flexible(
-          child: Text(v.$1, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
-        ),
+        Flexible(child: Text(v.$1, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface))),
       ]),
     );
   }
@@ -93,9 +89,9 @@ class BookCard extends StatelessWidget {
         const SizedBox(width: 14),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(book.subject, style: t.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            Text('${boardById(book.board).short}, Class ${book.classNo}', style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
-            Text('Language: ${book.language ?? 'not verified'}', style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+            Text(book.title, style: t.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+            Text('${boardById(book.board).short}, ${book.classLabel}, ${book.subject}', style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+            Text('${book.medium} medium, ${book.edition}', style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
             const SizedBox(height: 8),
             StatusChip(book),
           ]),

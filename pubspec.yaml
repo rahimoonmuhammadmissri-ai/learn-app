@@ -1,16 +1,17 @@
 name: learn_app
 description: Learn - Smart Study App
 publish_to: "none"
-version: 0.2.0+2
+version: 0.3.0+3
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: ">=3.7.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.3.0
   path_provider: ^2.1.0
+  pdfrx: ^2.4.0
 
 flutter:
   uses-material-design: true

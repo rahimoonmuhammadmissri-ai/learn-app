@@ -11,6 +11,8 @@ const boards = [
   Board('balochistan', 'Balochistan Board', 'Balochistan'),
 ];
 
+const mediums = ['English', 'Urdu', 'Sindhi'];
+
 Board boardById(String id) => boards.firstWhere((b) => b.id == id);
 
 class Book {
@@ -18,47 +20,39 @@ class Book {
     required this.id,
     required this.board,
     required this.classNo,
+    required this.title,
     required this.subject,
-    this.language,
-    this.sourceUrl,
-    this.sourceName,
+    required this.medium,
+    required this.edition,
+    required this.pageUrl,
+    this.pdfUrl,
   });
-  final String id, board, subject;
+
+  /// App id, e.g. stbb-85 (board + official portal id).
+  final String id, board, title, subject, medium, edition, pageUrl;
+
+  /// 0 = ECCE / Katchi, 1-12 = Class 1-12.
   final int classNo;
-  final String? language, sourceUrl, sourceName;
-  bool get hasSource => sourceUrl != null;
+
+  /// Official direct download link. null = no verified download link, shown as Unavailable.
+  final String? pdfUrl;
+
+  String get classLabel => classNo == 0 ? 'ECCE' : 'Class $classNo';
 }
 
-/// Subjects offered per class. A general list, not a claim about any one board's exact books.
-List<String> subjectsForClass(int c) {
-  if (c <= 5) return ['English', 'Urdu', 'Mathematics', 'General Science', 'Islamiyat', 'Social Studies'];
-  if (c <= 8) return ['English', 'Urdu', 'Mathematics', 'General Science', 'Computer Science', 'Islamiyat', 'Social Studies'];
-  return ['Biology', 'Chemistry', 'Physics', 'Mathematics', 'English', 'Urdu', 'Computer Science', 'Islamiyat', 'Pakistan Studies'];
-}
-
-final allSubjects = <String>{for (var c = 1; c <= 12; c++) ...subjectsForClass(c)}.toList();
-
-/// Verified official PDF sources. Key = book id, value = [direct PDF url, source name].
-/// EMPTY ON PURPOSE: only add a link after confirming it is an official or properly licensed source.
-/// Example: 'punjab-9-physics': ['https://<official-site>/<file>.pdf', 'Official site name'],
-const Map<String, List<String>> verifiedSources = {};
-
-/// Catalog entries (board x class x subject). Without a verified source they show "Source not added yet".
-final List<Book> catalog = [
-  for (final b in boards)
-    for (var c = 1; c <= 12; c++)
-      for (final s in subjectsForClass(c))
-        () {
-          final id = '${b.id}-$c-${s.toLowerCase().replaceAll(' ', '-')}';
-          final src = verifiedSources[id];
-          return Book(
-            id: id,
-            board: b.id,
-            classNo: c,
-            subject: s,
-            language: s == 'English' ? 'English' : (s == 'Urdu' ? 'Urdu' : null),
-            sourceUrl: src?[0],
-            sourceName: src?[1],
-          );
-        }(),
+/// Only books verified against the official portal are listed here.
+/// Each entry: detail page opened, "Download PDF" button link copied from that page.
+const List<Book> catalog = [
+  // Verified 2026-10-12: https://portal.stbb.edu.pk/ebooks/book.php?id=85
+  Book(
+    id: 'stbb-85',
+    board: 'stbb',
+    classNo: 3,
+    title: 'Math III',
+    subject: 'Mathematics',
+    medium: 'English',
+    edition: '2024-25',
+    pageUrl: 'https://portal.stbb.edu.pk/ebooks/book.php?id=85',
+    pdfUrl: 'https://portal.stbb.edu.pk/ebooks/pdf_proxy.php?id=85&download=1',
+  ),
 ];
