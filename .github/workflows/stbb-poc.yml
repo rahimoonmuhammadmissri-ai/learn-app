@@ -1,0 +1,28 @@
+name: STBB POC
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  poc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tool/stbb_poc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - name: Run proof of concept
+        run: dart run bin/main.dart 2>&1 | tee poc_log.txt
+      - name: Show report
+        if: always()
+        run: cat poc_report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stbb-poc
+          path: |
+            tool/stbb_poc/poc_report.md
+            tool/stbb_poc/poc_log.txt
+            tool/stbb_poc/poc_raw/
